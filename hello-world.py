@@ -7,7 +7,7 @@ name = input ("What is your name?")
 age= input ("What is your age?")
 age = int(age)
 age_next_year = age + 1
-pi = 3.14
+pi = 3.14159265359
 A = 5%3
 B = 5*3
 
