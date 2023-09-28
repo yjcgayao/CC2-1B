@@ -1,8 +1,12 @@
+# Submitted by: Gayao, Yasmien Jen C.
+# BSCS - 1
+# CC2 - 1B
+# September 27, 2023
+
 name = input ("What is your name?")
 age= input ("What is your age?")
 age = int(age)
 age_next_year = age + 1
-
 pi = 3.14
 A = 5%3
 B = 5*3
