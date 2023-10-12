@@ -1,7 +1,11 @@
 # Gayao, Yasmien jen C.
 # BSCS 1-B     CC2
-rows = 5
-for i in range(1, rows + 1):
-    for j in range(1, i + 1):
-        print(j, end=' ')
-    print('')
+def print_row(rows):
+  """Prints a row of numbers from 1 to the given row number.
+  Args:
+    rows: The number of rows to print.
+  """
+  print(*range(1, rows + 1))
+# Print a right triangle with 5 rows.
+for i in range(5):
+  print_row(i + 1)
