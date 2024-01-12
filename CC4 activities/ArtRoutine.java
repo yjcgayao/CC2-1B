@@ -24,6 +24,7 @@ public class ArtRoutine {
                     break;
                 } else {
                     System.out.println("   - Invalid number choice, choose a number between 1 and 2.");
+                    scanner.nextLine();  //Handle  the invalid input
                 }
             } else {
                 System.out.println("  - Invalid input, choose a number between 1 and 2.");
