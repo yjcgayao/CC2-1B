@@ -1,0 +1,229 @@
+using System;
+using System.Collections.Generic;
+
+public enum VehicleSize
+{
+    Motorcycle,
+    Compact,
+    Large
+}
+
+public class Vehicle
+{
+    public string LicensePlate { get; }
+
+    public Vehicle(string licensePlate)
+    {
+        LicensePlate = licensePlate;
+    }
+
+    public virtual VehicleSize Size { get; }
+}
+
+public class Car : Vehicle
+{
+    public Car(string licensePlate) : base(licensePlate) { }
+
+    public override VehicleSize Size => VehicleSize.Compact;
+}
+
+public class Truck : Vehicle
+{
+    public Truck(string licensePlate) : base(licensePlate) { }
+
+    public override VehicleSize Size => VehicleSize.Large;
+}
+
+public class Motorcycle : Vehicle
+{
+    public Motorcycle(string licensePlate) : base(licensePlate) { }
+
+    public override VehicleSize Size => VehicleSize.Motorcycle;
+}
+
+public class Spot
+{
+    public bool IsAvailable { get; set; }
+    public VehicleSize Size { get; }
+    public Vehicle ParkedVehicle { get; set; } // Reference to the parked vehicle
+
+    public Spot(VehicleSize size)
+    {
+        Size = size;
+        IsAvailable = true;
+        ParkedVehicle = null;
+    }
+}
+
+public class Row
+{
+    public List<Spot> Spots { get; }
+
+    public Row(int numberOfSpots, VehicleSize size)
+    {
+        Spots = new List<Spot>();
+        for (int i = 0; i < numberOfSpots; i++)
+        {
+            Spots.Add(new Spot(size));
+        }
+    }
+}
+
+public class Level
+{
+    public List<Row> Rows { get; }
+    public int AvailableSpots { get; set; }
+
+    public Level(int numberOfRows, int spotsPerRow, VehicleSize size)
+    {
+        Rows = new List<Row>();
+        AvailableSpots = numberOfRows * spotsPerRow;
+        for (int i = 0; i < numberOfRows; i++)
+        {
+            Rows.Add(new Row(spotsPerRow, size));
+        }
+    }
+}
+
+public class ParkingLot
+{
+    private List<Level> levels;
+
+    public ParkingLot(int numberOfLevels, int numberOfRows, int spotsPerRow)
+    {
+        levels = new List<Level>();
+        for (int i = 0; i < numberOfLevels; i++)
+        {
+            levels.Add(new Level(numberOfRows, spotsPerRow, VehicleSize.Large));
+        }
+    }
+
+    public bool ParkVehicle(Vehicle vehicle)
+{
+    foreach (var level in levels)
+    {
+        foreach (var row in level.Rows)
+        {
+            foreach (var spot in row.Spots)
+            {
+                if (spot.IsAvailable && IsSpotCompatible(spot, vehicle))
+                {
+                    spot.IsAvailable = false;
+                    spot.ParkedVehicle = vehicle;
+                    level.AvailableSpots--; // Decrease the available spots count
+                    Console.WriteLine($"Vehicle with license plate {vehicle.LicensePlate} parked at Level {levels.IndexOf(level) + 1}, Row {level.Rows.IndexOf(row) + 1}, Spot {row.Spots.IndexOf(spot) + 1}");
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+    public bool RemoveParkedVehicle(Vehicle vehicle)
+    {
+        foreach (var level in levels)
+        {
+            foreach (var row in level.Rows)
+            {
+                foreach (var spot in row.Spots)
+                {
+                    if (!spot.IsAvailable && vehicle.LicensePlate == spot.ParkedVehicle.LicensePlate)
+                    {
+                        spot.IsAvailable = true;
+                        spot.ParkedVehicle = null;
+                        level.AvailableSpots++; // Increase the available spots count
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public Spot FindSpotForVehicle(Vehicle vehicle)
+    {
+        foreach (var level in levels)
+        {
+            foreach (var row in level.Rows)
+            {
+                foreach (var spot in row.Spots)
+                {
+                    if (spot.IsAvailable && IsSpotCompatible(spot, vehicle))
+                    {
+                        return spot; // Return the first available compatible spot found
+                    }
+                }
+            }
+        }
+        return null; // No suitable spot found
+    }
+
+    private bool IsSpotCompatible(Spot spot, Vehicle vehicle)
+    {
+        // Check if the vehicle size matches the spot size
+        if (vehicle is Car && (spot.Size == VehicleSize.Compact || spot.Size == VehicleSize.Large))
+        {
+            return true;
+        }
+        else if (vehicle is Truck && spot.Size == VehicleSize.Large)
+        {
+            return true;
+        }
+        else if (vehicle is Motorcycle && (spot.Size == VehicleSize.Compact || spot.Size == VehicleSize.Motorcycle))
+        {
+            return true;
+        }
+        return false;
+    }
+
+   public void PrintAvailableSpots()
+{
+    Console.WriteLine("Parking Lot Status:");
+    for (int i = 0; i < levels.Count; i++)
+    {
+        Console.WriteLine($"Level {i + 1}:");
+        foreach (var row in levels[i].Rows)
+        {
+            foreach (var spot in row.Spots)
+            {
+                if (spot.IsAvailable)
+                {
+                    Console.WriteLine($"   Spot {row.Spots.IndexOf(spot) + 1}: Available");
+                }
+                else
+                {
+                    Console.WriteLine($"   Spot {row.Spots.IndexOf(spot) + 1}: Taken by {spot.ParkedVehicle.LicensePlate}");
+                }
+            }
+        }
+    }
+}
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        int levels = 2;
+        int numberOfRows = 3;
+        int spotsPerRow = 5;
+        ParkingLot parkingLot = new ParkingLot(levels, numberOfRows, spotsPerRow);
+
+        Car car1 = new Car("ABC123");
+        Car car2 = new Car("DEF456");
+        Truck truck1 = new Truck("GHI789");
+        Motorcycle bike1 = new Motorcycle("JKL012");
+
+        Console.WriteLine("Park Car1: " + parkingLot.ParkVehicle(car1));
+        Console.WriteLine("Park Car2: " + parkingLot.ParkVehicle(car2));
+        Console.WriteLine("Park Truck1: " + parkingLot.ParkVehicle(truck1));
+        Console.WriteLine("Park Bike1: " + parkingLot.ParkVehicle(bike1));
+
+        Console.WriteLine("Remove Car1: " + parkingLot.RemoveParkedVehicle(car1));
+        Console.WriteLine("Remove Truck1: " + parkingLot.RemoveParkedVehicle(truck1));
+        Console.WriteLine("Remove Bike1: " + parkingLot.RemoveParkedVehicle(bike1));
+
+        parkingLot.PrintAvailableSpots();
+    }
+}
